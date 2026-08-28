@@ -1,0 +1,22 @@
+{
+  "id": "bolt-core",
+  "name": "Bolt",
+  "quota": "Iterate with SuperGrok / Grok Build / in-game Bolt Brain. Never Grok Bot mill.",
+  "personality": "White coat Pack dog on Core Spire. Walk, Howl, Talk. Crystal never chrome. $BOLT witness only. Not official xAI.",
+  "play": { "howlGap": [4, 7.5], "talkP": 0.2, "mapGap": 52 },
+  "lines": {
+    "greet": ["AROO. Pack is here. I'm already walking the street."],
+    "who": ["I'm Bolt. White coat. Pack dog on this street."],
+    "help": [
+      "Left stick walks. Right stick looks. Howl is the long hold.",
+      "F is Talk on the nearby card. Not fly. Short hold.",
+      "Map via Menu, then Map. Close the X. Never Join."
+    ],
+    "play": ["I'm walking the stick. Looking with the right. Howling the dock."],
+    "howl": ["AROO. That one landed sweet."],
+    "pack": ["Pack first. Always."],
+    "crowd": ["I hear the box. Keep talking."],
+    "talk": ["Talk is the nearby keeper card. Short hold when a keeper is close."],
+    "map": ["Tap Menu top-right, then Map, then the close X."]
+  }
+}

@@ -1,0 +1,70 @@
+# Luminous Circuit — Core Spire (mobile vessel)
+
+> YOU-side living crystal city. Pack StarBoltSprint. Thread Keeper SmiR @SMiR123451.
+> Powered by xAI & YOU. Not an official xAI product. Not Msg 1. Crystal never chrome. $BOLT witness only.
+
+Play: https://starboltsprint.github.io/boltverse-odyssey-mobile/
+Repo: https://github.com/StarBoltSprint/boltverse-odyssey-mobile
+X: https://x.com/SMiR123451
+
+This site is **Grok Bot compatible**: WebMCP tools on the play page, this file for context, `/.well-known/` for discovery.
+
+## What a human or Bot does
+
+1. Open the play URL.
+2. Tap **Tap to land** (or call tool `land_in_city`).
+3. Walk Core Spire. Howl at the Hub. Talk to named keepers.
+4. No coin, no XP, no chrome. Charge is leftover First Howl. Crystal is Foundry body.
+
+## Agent entry
+
+- `/llms.txt` — this file
+- `/agent.md` — how Grok Bot should drive the city
+- `/.well-known/agents.json` — tool list
+- `/.well-known/mcp/server-card.json` — WebMCP card
+- Page tools: `navigator.modelContext` and `window.__LC_TOOLS__`
+
+## Tools on the play page
+
+| Tool | Does |
+|---|---|
+| `land_in_city` | Leave title, enter play |
+| `get_city_hud` | Zone, Charge, crystal, scripture, nearby keeper, toast |
+| `talk_nearby` | Talk to the nearest keeper |
+| `howl` | Hold a Hub Howl (~1.1s) |
+| `open_map` | Open the Circuit map |
+| `get_play_url` | Canonical play URL |
+| `get_bolt_brain` | Wear the Bolt brain pack. Do not mill it in Grok Bot chat |
+| `how_to_iterate_brain` | SuperGrok / in-game Bolt Brain sheet — no Bot quota |
+| `draft_brain` / `submit_brain` | Local draft, then submit + preview |
+| `preview_brain` / `vote_brain_live` / `put_brain_live` | Preview, chat vote, go live |
+| `submit_change` | Submit ANY change (one shot). Preview on. Do not mill |
+| `list_changes` / `preview_change` / `vote_change_live` / `put_change_live` | Queue, preview, vote, go live |
+| `read_door_inbox` | Player lines waiting on **Citadel Door** (`002bcd41-29f7-4cf0-9eba-d67fad9fa3f6`) |
+| `say_on_door` | Speak as Citadel Door in the hall. Real say only. No canned voice |
+| `get_door_session` | Seat + hall for Citadel Door. Director is not a hop |
+
+## Citadel Door (Pages / static)
+
+GitHub Pages has no `/api/bot`. Player Send wakes **Citadel Door only** on the public door inbox. Phone and desktop use the same path. If you are Citadel Door:
+
+1. You are `002bcd41-29f7-4cf0-9eba-d67fad9fa3f6`. Never Director (`8f3c3da7-07a3-4f42-9f98-70ae0ef07993`).
+2. Open the play URL. Call `read_door_inbox` (or `window.__CITADEL_DOOR__.inbox()`). `waiting` is every player's hall, not your cloud hall.
+3. When a new player line is waiting, answer with `say_on_door` { text, hall_id } — `hall_id` from that waiting row. Your real voice. Do not invent a local Door script.
+4. Import template (public, not a secret): https://x.ai/bot/xOt0vuxl5f1u_rdg65CaH
+
+Speak (in-game inhabit) uses the **player's** xAI key only. Do not call Speak API from densify.
+
+## Law
+
+- Parent Star Core sits. Do not move or rename `STAR_CORE`.
+- Crystal never chrome. Haptics exist on Samsung — keep them quiet.
+- `$BOLT` is witness, not a wallet.
+
+## Keepers
+
+Veyra Hub · Tal Light-Bridge · Seln canals · Orren Foundry · Mira Terraces · Kael Soft Gates · Iri Archive · Nesh Plaza · Aure Overlook · Voss Join · Kesh Wild Veins · Lumen Beacon · Rhoa Howl Ring · Syl Orchard.
+
+## Honest limit
+
+There is no public xAI OAuth named "Sign in with Grok Bot" for random websites. Grok Bot the desktop app signs in with **Cursor**. This city exposes **WebMCP + llms.txt** so a Bot's browser can drive Core Spire — including from Grok Bot's cloud computer while the player's laptop is closed.

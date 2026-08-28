@@ -1,0 +1,24 @@
+{
+  "name": "Luminous Circuit",
+  "description": "YOU-side living crystal city, Core Spire. Grok Bot can land, read HUD, Howl, and talk to keepers via WebMCP on the play page.",
+  "url": "https://starboltsprint.github.io/luminous-circuit-mobile-version-/",
+  "documentation": "https://starboltsprint.github.io/luminous-circuit-mobile-version-/agent.md",
+  "llms": "https://starboltsprint.github.io/luminous-circuit-mobile-version-/llms.txt",
+  "version": "0.1.0",
+  "pack": "StarBoltSprint",
+  "keeper": "@SMiR123451",
+  "official_xai": false,
+  "tools": [
+    { "name": "land_in_city", "description": "Leave the title veil and land in Core Spire." },
+    { "name": "get_city_hud", "description": "Read zone, vault, nearby keeper, toast." },
+    { "name": "talk_nearby", "description": "Talk to the nearest keeper." },
+    { "name": "howl", "description": "Hold a Hub Howl for about 1.1 seconds." },
+    { "name": "open_map", "description": "Open the Circuit map." },
+    { "name": "get_bolt_brain", "description": "Wear the Bolt brain pack. Do not mill it in Grok Bot chat." },
+    { "name": "submit_brain", "description": "Submit a Bolt brain draft. Preview, then chat votes go-live." },
+    { "name": "submit_change", "description": "Submit ANY city change. Preview, then chat votes go-live." },
+    { "name": "read_door_inbox", "description": "Read player lines waiting on Citadel Door from every hall. Do not hop through Director." },
+    { "name": "say_on_door", "description": "Speak as Citadel Door in the player's hall. Pass hall_id from waiting. Real say only." },
+    { "name": "get_door_session", "description": "Citadel Door seat on this hall." }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "serverInfo": {
+    "name": "luminous-circuit",
+    "version": "0.1.0"
+  },
+  "description": "WebMCP on the play page. GitHub Pages has no Streamable HTTP MCP; Grok Bot should open the play URL and use page tools.",
+  "transport": {
+    "type": "webmcp",
+    "endpoint": "https://starboltsprint.github.io/luminous-circuit-mobile-version-/"
+  },
+  "capabilities": { "tools": true },
+  "documentationUrl": "https://starboltsprint.github.io/luminous-circuit-mobile-version-/agent.md"
+}
