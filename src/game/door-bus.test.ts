@@ -4,9 +4,13 @@ import { DOOR_BOT } from "../lib/bot/door-template.ts";
 import {
   DOOR_BUS_TOPIC,
   doorWakeRow,
+  filterDoorRows,
   isDoorBusRow,
   isStaticPagesHost,
+  pickSayHallId,
   publishDoorSay,
+  pullDoorSays,
+  pullDoorWakes,
   wakeCitadelDoor,
 } from "./door-bus.ts";
 
@@ -112,5 +116,71 @@ describe("static Pages Door wake", () => {
     const sent = JSON.parse(posts[0]!.body) as { from: string; text: string };
     assert.equal(sent.from, "bot");
     assert.equal(sent.text, "Here.");
+  });
+
+  it("player wakes are readable from any hall; says stay on the player hall", () => {
+    const playerA = doorWakeRow("hello from A", "2026-08-28T20:00:00.000Z", "hall_A");
+    const playerB = doorWakeRow("hello from B", "2026-08-28T20:00:01.000Z", "hall_B");
+    const sayA: ReturnType<typeof doorWakeRow> = {
+      ...playerA,
+      from: "bot",
+      text: "Here.",
+      at: "2026-08-28T20:00:02.000Z",
+    };
+    const director = { ...playerA, bot_id: DIRECTOR, bot_name: "Boltverse Director", from: "bot" as const };
+    const rows = [playerA, playerB, sayA, director];
+    const wakes = filterDoorRows(rows, { from: "player" });
+    assert.equal(wakes.length, 2);
+    assert.deepEqual(
+      wakes.map((r) => r.hall_id),
+      ["hall_A", "hall_B"],
+    );
+    const playerSees = filterDoorRows(rows, { from: "bot", hallId: "hall_A" });
+    assert.equal(playerSees.length, 1);
+    assert.equal(playerSees[0]?.text, "Here.");
+    assert.equal(filterDoorRows(rows, { from: "bot", hallId: "hall_B" }).length, 0);
+  });
+
+  it("say targets the player's hall, not the Door cloud hall", () => {
+    const waiting = [doorWakeRow("ping", "2026-08-28T20:00:00.000Z", "hall_player")];
+    assert.equal(pickSayHallId("hall_explicit_1", waiting, "hall_cloud"), "hall_explicit_1");
+    assert.equal(pickSayHallId("", waiting, "hall_cloud"), "hall_player");
+    assert.equal(pickSayHallId(undefined, [], "hall_cloud"), "hall_cloud");
+  });
+
+  it("pullDoorWakes sees every player hall; pullDoorSays stays on one hall", async () => {
+    const ndjson = [
+      { id: "1", event: "message", message: JSON.stringify(doorWakeRow("from A", "2026-08-28T20:00:00.000Z", "hall_A")) },
+      {
+        id: "2",
+        event: "message",
+        message: JSON.stringify({
+          bot_id: DOOR_BOT.id,
+          bot_name: "Citadel Door",
+          hall_id: "hall_A",
+          from: "bot",
+          text: "Here A.",
+          at: "2026-08-28T20:00:02.000Z",
+        }),
+      },
+      { id: "3", event: "message", message: JSON.stringify(doorWakeRow("from B", "2026-08-28T20:00:03.000Z", "hall_B")) },
+    ]
+      .map((row) => JSON.stringify(row))
+      .join("\n");
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      value: async () => new Response(ndjson, { status: 200, headers: { "content-type": "application/x-ndjson" } }),
+    });
+    const wakes = await pullDoorWakes();
+    assert.equal(wakes.length, 2);
+    assert.deepEqual(
+      wakes.map((r) => r.hall_id),
+      ["hall_A", "hall_B"],
+    );
+    const saysA = await pullDoorSays("hall_A");
+    assert.equal(saysA.length, 1);
+    assert.equal(saysA[0]?.text, "Here A.");
+    const saysB = await pullDoorSays("hall_B");
+    assert.equal(saysB.length, 0);
   });
 });

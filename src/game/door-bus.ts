@@ -77,7 +77,7 @@ export function doorWakeRow(text: string, at: string, hallId = doorHallId()): Do
 function postDoorBus(row: DoorBusRow): void {
   void fetch(DOOR_BUS_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Title: "Citadel Door", Tags: "door" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(row),
   }).catch(() => {
     /* best-effort; do not fail Send */
@@ -104,6 +104,11 @@ type NtfyEvent = {
   message?: string;
 };
 
+export type DoorBusFilter = {
+  from?: "player" | "bot";
+  hallId?: string | null;
+};
+
 function parseNtfyLine(line: string): { id?: string; row: DoorBusRow | null } {
   try {
     const ev = JSON.parse(line) as NtfyEvent;
@@ -120,31 +125,54 @@ function parseNtfyLine(line: string): { id?: string; row: DoorBusRow | null } {
   }
 }
 
-/** Pull Citadel Door says for this hall. Never returns Director lines. */
-export async function pullDoorSays(hallId = doorHallId()): Promise<DoorBusRow[]> {
-  const since = readSince();
+/** Keep Citadel Door rows only. Player wakes are not hall-bound; says are. */
+export function filterDoorRows(rows: DoorBusRow[], filter: DoorBusFilter = {}): DoorBusRow[] {
+  return rows.filter((row) => {
+    if (row.bot_id !== DOOR_BOT.id || row.bot_id === DIRECTOR_ID) return false;
+    if (filter.from && row.from !== filter.from) return false;
+    if (filter.hallId && row.hall_id !== filter.hallId) return false;
+    return true;
+  });
+}
+
+/** Citadel Door answers the player's hall, not its own cloud-computer hall. */
+export function pickSayHallId(explicit: unknown, waiting: DoorBusRow[], fallback: string): string {
+  if (typeof explicit === "string" && explicit.trim().length >= 8) return explicit.trim();
+  const last = [...waiting].reverse().find((row) => row.from === "player" && row.hall_id);
+  if (last?.hall_id) return last.hall_id;
+  return fallback;
+}
+
+async function pullDoorBus(filter: DoorBusFilter, opts: { since: "all" | "cursor"; rememberCursor: boolean }): Promise<DoorBusRow[]> {
+  const cursor = opts.since === "cursor" ? readSince() : null;
   const url = new URL(`${DOOR_BUS_URL}/json`);
   url.searchParams.set("poll", "1");
-  if (since) url.searchParams.set("since", since);
+  url.searchParams.set("since", cursor || "all");
   try {
     const res = await fetch(url.toString(), { method: "GET", cache: "no-store" });
     if (!res.ok) return [];
     const text = await res.text();
-    const out: DoorBusRow[] = [];
-    let lastId = since;
+    const rows: DoorBusRow[] = [];
+    let lastId = cursor;
     for (const line of text.split(/\r?\n/)) {
       if (!line.trim()) continue;
       const parsed = parseNtfyLine(line);
       if (parsed.id) lastId = parsed.id;
-      const row = parsed.row;
-      if (!row || row.from !== "bot") continue;
-      if (row.bot_id !== DOOR_BOT.id || row.bot_id === DIRECTOR_ID) continue;
-      if (row.hall_id !== hallId) continue;
-      out.push(row);
+      if (parsed.row) rows.push(parsed.row);
     }
-    if (lastId && lastId !== since) writeSince(lastId);
-    return out;
+    if (opts.rememberCursor && lastId && lastId !== cursor) writeSince(lastId);
+    return filterDoorRows(rows, filter);
   } catch {
     return [];
   }
+}
+
+/** Player lines on the public inbox — every hall. Citadel Door reads this from its own browser. */
+export async function pullDoorWakes(): Promise<DoorBusRow[]> {
+  return pullDoorBus({ from: "player" }, { since: "all", rememberCursor: false });
+}
+
+/** Pull Citadel Door says for this hall. Never returns Director lines. */
+export async function pullDoorSays(hallId = doorHallId()): Promise<DoorBusRow[]> {
+  return pullDoorBus({ from: "bot", hallId }, { since: "cursor", rememberCursor: true });
 }

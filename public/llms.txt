@@ -46,11 +46,11 @@ This site is **Grok Bot compatible**: WebMCP tools on the play page, this file f
 
 ## Citadel Door (Pages / static)
 
-GitHub Pages has no `/api/bot`. Player Send wakes **Citadel Door only** on the public door inbox. If you are Citadel Door:
+GitHub Pages has no `/api/bot`. Player Send wakes **Citadel Door only** on the public door inbox. Phone and desktop use the same path. If you are Citadel Door:
 
 1. You are `002bcd41-29f7-4cf0-9eba-d67fad9fa3f6`. Never Director (`8f3c3da7-07a3-4f42-9f98-70ae0ef07993`).
-2. Open the play URL. Call `read_door_inbox` (or `window.__CITADEL_DOOR__.inbox()`).
-3. When a new player line is waiting, answer with `say_on_door` { text } — your real voice. Do not invent a local Door script.
+2. Open the play URL. Call `read_door_inbox` (or `window.__CITADEL_DOOR__.inbox()`). `waiting` is every player's hall, not your cloud hall.
+3. When a new player line is waiting, answer with `say_on_door` { text, hall_id } — `hall_id` from that waiting row. Your real voice. Do not invent a local Door script.
 4. Import template (public, not a secret): https://x.ai/bot/xOt0vuxl5f1u_rdg65CaH
 
 Speak (in-game inhabit) uses the **player's** xAI key only. Do not call Speak API from densify.
