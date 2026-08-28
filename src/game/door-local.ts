@@ -1,11 +1,7 @@
-import { DOOR_TEMPLATE_URL } from "@/lib/bot/door-template";
-import type { ChatLine, GrokBotChoice, SessionPayload } from "@/lib/bot/types";
+import { DOOR_BOT, DOOR_TEMPLATE_URL } from "../lib/bot/door-template.ts";
+import type { ChatLine, SessionPayload } from "../lib/bot/types.ts";
 
-/** Same Door id as grok-bots.ts. Picker: Citadel Door only. */
-export const DOOR_BOT: GrokBotChoice = {
-  id: "002bcd41-29f7-4cf0-9eba-d67fad9fa3f6",
-  name: "Citadel Door",
-};
+export { DOOR_BOT };
 
 const KEY = "odyssey-door-slit";
 
@@ -68,6 +64,14 @@ function view(store: Store): SessionPayload {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function mergeBotLine(store: Store, line: ChatLine) {
+  const dup = store.chat.some((c) => c.from === "bot" && c.text === line.text && c.at === line.at);
+  if (dup) return;
+  store.chat.push({ from: "bot", text: line.text, at: line.at });
+  store.chat = store.chat.slice(-40);
+  if (store.session) store.session.activity = "on the door";
 }
 
 function json(body: unknown, status = 200): Response {
@@ -145,9 +149,8 @@ export function doorLocalResponse(init: RequestInit = {}): Response {
   if (op === "say") {
     const text = String(rec.text || "").trim().slice(0, 240);
     if (!text) return json({ error: "text is required." }, 400);
-    store.chat.push({ from: "bot", text, at: nowIso() });
-    store.chat = store.chat.slice(-40);
-    store.session.activity = "on the door";
+    const at = typeof rec.at === "string" && rec.at ? rec.at : nowIso();
+    mergeBotLine(store, { from: "bot", text, at });
     save(store);
     return json(view(store));
   }

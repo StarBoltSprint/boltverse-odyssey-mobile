@@ -3,6 +3,7 @@ import { ARTIFACTS, type ArtifactId } from "@/game/artifacts";
 import type { RaisingHandle, RaisingHud } from "@/game/raising-engine";
 import type { SkyHandle, SkyHud } from "@/game/constellation-engine";
 import { fetchBotSession, type SessionPayload } from "@/game/bot-session";
+import { installDoorTools } from "@/game/door-tools";
 import { ArtifactHall } from "./ArtifactHall";
 import { CitadelHub } from "./CitadelHub";
 import { RaisingDock } from "./RaisingDock";
@@ -24,6 +25,7 @@ export function RaisingApp() {
   const [bot, setBot] = useState<SessionPayload>({ session: null, den: null, landables: [], bots: [], door_template_url: null });
 
   useEffect(() => {
+    installDoorTools();
     void fetchBotSession().then(setBot);
   }, []);
 

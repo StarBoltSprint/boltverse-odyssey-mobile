@@ -54,7 +54,13 @@ export function GrokBotSignIn({
     try {
       const out = await disconnectBot();
       if (!out.ok) setErr(out.error || "Disconnect failed.");
-      publish({ session: null, den: payload.den, landables: payload.landables, bots: payload.bots });
+      publish({
+        session: null,
+        den: payload.den,
+        landables: payload.landables,
+        bots: payload.bots,
+        door_template_url: payload.door_template_url ?? null,
+      });
     } finally {
       setBusy(false);
     }

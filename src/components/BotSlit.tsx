@@ -313,7 +313,7 @@ export function BotSlit() {
           <ol className="citadel-slit-lines">
             <li data-from="game">
               <b>Door</b>
-              <span>Import Citadel Door, allow the Door chat line once, then talk here. Same as before — no MCP.</span>
+              <span>Import Citadel Door, allow the Door chat line once, then talk here. Send wakes that bot. The hall waits for its real say — no canned Door voice.</span>
             </li>
             {lines.map((line, i) => (
               <li key={`${line.at}-${i}`} data-from={line.from}>

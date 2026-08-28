@@ -16,6 +16,9 @@
     { "name": "open_map", "description": "Open the Circuit map." },
     { "name": "get_bolt_brain", "description": "Wear the Bolt brain pack. Do not mill it in Grok Bot chat." },
     { "name": "submit_brain", "description": "Submit a Bolt brain draft. Preview, then chat votes go-live." },
-    { "name": "submit_change", "description": "Submit ANY city change. Preview, then chat votes go-live." }
+    { "name": "submit_change", "description": "Submit ANY city change. Preview, then chat votes go-live." },
+    { "name": "read_door_inbox", "description": "Read player lines waiting on Citadel Door from every hall. Do not hop through Director." },
+    { "name": "say_on_door", "description": "Speak as Citadel Door in the player's hall. Pass hall_id from waiting. Real say only." },
+    { "name": "get_door_session", "description": "Citadel Door seat on this hall." }
   ]
 }

@@ -1,7 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RaisingApp } from "@/components/RaisingApp";
+import { installDoorTools } from "@/game/door-tools";
 import "./styles.css";
+
+installDoorTools();
 
 try {
   void navigator.serviceWorker?.getRegistrations?.().then((regs) => {
