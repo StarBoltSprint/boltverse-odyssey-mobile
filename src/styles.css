@@ -4040,14 +4040,14 @@ video.citadel-live {
   pointer-events: auto;
   box-sizing: border-box;
 }
-/* Pin to top-right (safe-area). Song chip is top-left so this owns the corner. */
+/* Pin to top-right of the Citadel (not the Grok Bot chrome). */
 .citadel-slit-corner {
-  position: fixed;
+  position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 12px);
   right: max(8px, env(safe-area-inset-right, 0px));
   left: auto;
   bottom: auto;
-  z-index: 4;
+  z-index: 6;
 }
 .citadel-slit[data-guest="true"] {
   box-shadow:
@@ -4160,7 +4160,7 @@ video.citadel-live {
 .citadel-slit-travel:active {
   transform: translateY(2px);
 }
-.citadel-slit[data-pick="true"] {
+.citadel-slit[data-pick="true"]:not([data-full="true"]) {
   flex-wrap: wrap;
   align-items: stretch;
   width: min(16.5rem, calc(100vw - 16px));
@@ -4262,7 +4262,7 @@ video.citadel-live {
   text-overflow: unset;
   color: var(--color-muted);
 }
-.citadel-slit[data-talk="true"] {
+.citadel-slit[data-talk="true"]:not([data-full="true"]) {
   flex-wrap: wrap;
   align-items: stretch;
   width: min(16.5rem, calc(100vw - 16px));
@@ -4398,46 +4398,58 @@ video.citadel-live {
   }
 }
 
-/* Fullscreen Door hall — phone first. */
-.citadel-slit[data-full="true"] {
-  position: fixed;
+.citadel:has(> .citadel-slit[data-full="true"]) .citadel-pack,
+.citadel:has(> .citadel-slit[data-full="true"]) .citadel-rail,
+.citadel:has(> .citadel-slit[data-full="true"]) .citadel-foot {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Fullscreen Door hall — covers the whole Citadel, not a strip. */
+.citadel-slit.citadel-slit-corner[data-full="true"],
+.citadel-slit[data-full="true"][data-pick="true"],
+.citadel-slit[data-full="true"][data-talk="true"] {
+  position: absolute;
   inset: 0;
   top: 0;
   right: 0;
   left: 0;
   bottom: 0;
-  z-index: 50;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  width: 100%;
+  width: auto;
   max-width: none;
-  min-height: 100dvh;
-  max-height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  height: auto;
   padding: 0;
+  padding-bottom: var(--slit-kb, 0px);
   border-radius: 0;
   overflow: hidden;
   color: var(--color-fg);
   background:
-    radial-gradient(120% 80% at 50% -10%, color-mix(in oklab, var(--color-gold) 22%, transparent), transparent 55%),
-    radial-gradient(90% 50% at 80% 110%, color-mix(in oklab, var(--color-accent) 16%, transparent), transparent 50%),
-    linear-gradient(180deg, #16110c 0%, #07080e 42%, #05060a 100%);
+    radial-gradient(120% 70% at 50% -8%, rgba(247, 213, 106, 0.28), transparent 52%),
+    radial-gradient(80% 40% at 50% 100%, rgba(126, 232, 242, 0.12), transparent 55%),
+    #0b0a0e;
   box-shadow: none;
-  padding-bottom: var(--slit-kb, 0px);
 }
 .citadel-slit[data-full="true"] .citadel-slit-pick,
 .citadel-slit[data-full="true"] .citadel-slit-on {
   flex: 1 1 auto;
   min-height: 0;
-  width: 100%;
+  width: min(100%, 28rem);
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 14px)
-    max(16px, env(safe-area-inset-right, 0px))
-    calc(env(safe-area-inset-bottom, 0px) + 12px)
-    max(16px, env(safe-area-inset-left, 0px));
+    calc(env(safe-area-inset-top, 0px) + 18px)
+    max(18px, env(safe-area-inset-right, 0px))
+    calc(env(safe-area-inset-bottom, 0px) + 16px)
+    max(18px, env(safe-area-inset-left, 0px));
 }
 .citadel-slit-hall-head {
   display: flex;
@@ -4463,11 +4475,12 @@ video.citadel-live {
 .citadel-slit-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: clamp(1.6rem, 7vw, 2rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
   color: #f6e7b8;
+  white-space: nowrap;
 }
 .citadel-slit-sub {
   margin: 0;
@@ -4526,7 +4539,7 @@ video.citadel-live {
   font-size: 0.72rem;
 }
 .citadel-slit[data-full="true"] .citadel-slit-import {
-  padding: 16px 16px;
+  padding: 16px 18px;
   border-radius: 18px;
   background: linear-gradient(180deg, color-mix(in oklab, var(--color-gold) 28%, #1a140c), #14100c);
   box-shadow:
@@ -4536,9 +4549,11 @@ video.citadel-live {
 .citadel-slit[data-full="true"] .citadel-slit-import b {
   font-size: 1rem;
   color: #f6e7b8;
+  white-space: nowrap;
 }
 .citadel-slit[data-full="true"] .citadel-slit-import span {
   font-size: 0.92rem;
+  white-space: nowrap;
 }
 .citadel-slit[data-full="true"] .citadel-slit-hint {
   font-size: 0.85rem;

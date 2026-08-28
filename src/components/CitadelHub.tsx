@@ -167,9 +167,8 @@ export function CitadelHub({ onHall, onConstellation, onLand }: Props) {
         <button type="button" className="citadel-land" onClick={onLand}>
           Land
         </button>
-        {/* GROK_BOT_SLIT — live pane under LAND. Not a modal. */}
-        <GrokBotSlit />
       </footer>
+      <GrokBotSlit />
 
       {note && (
         <p className="citadel-note" role="status">
