@@ -1,4 +1,5 @@
 import { getBearerToken } from "@/lib/auth/client";
+import { DOOR_TEMPLATE_URL } from "@/lib/bot/door-template";
 import type { GrokBotChoice, Landable, SessionPayload } from "@/lib/bot/types";
 import { doorLocalResponse, withDoorBots } from "./door-local";
 
@@ -36,7 +37,7 @@ async function readPayload(res: Response): Promise<SessionPayload & { error?: st
       den: null,
       landables: [],
       bots: [],
-      door_template_url: null,
+      door_template_url: DOOR_TEMPLATE_URL,
       error: "Could not read Grok Bot session.",
     });
   }
@@ -56,7 +57,7 @@ export async function connectBot(choice: { bot_id: string; bot_name: string }): 
 export async function fetchBotSession(): Promise<SessionPayload> {
   const res = await botFetch({ method: "GET" });
   if (!res.ok) {
-    return withDoorBots({ session: null, den: null, landables: [], bots: [], door_template_url: null });
+    return withDoorBots({ session: null, den: null, landables: [], bots: [], door_template_url: DOOR_TEMPLATE_URL });
   }
   return readPayload(res);
 }

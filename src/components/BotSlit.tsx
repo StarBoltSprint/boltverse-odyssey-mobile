@@ -130,7 +130,8 @@ export function BotSlit() {
   function onImportDoor() {
     const url = payload.door_template_url;
     if (!url) return;
-    window.location.assign(url);
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) window.location.assign(url);
   }
 
   async function onConnect(bot: GrokBotChoice) {

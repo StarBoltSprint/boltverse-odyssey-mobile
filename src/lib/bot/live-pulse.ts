@@ -1,26 +1,28 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { DOOR_TEMPLATE_URL } from "./door-template.ts";
 
 export const LIVE_DIR = "/workspace/slit-play/live";
 export const DOOR_TEMPLATE_URL_FILE = "door-template-url.txt";
 
 const DOOR_TEMPLATE_URL_RE = /^(https?:\/\/|grokbot:\/\/)\S+$/i;
 
-/** First non-comment line that is http(s) or grokbot://. Missing/empty → null. Never a bot_id. */
+/** File first, else the public Citadel Door template. Never a bot_id. */
 export function readDoorTemplateUrl(dir = LIVE_DIR): string | null {
   const path = join(dir, DOOR_TEMPLATE_URL_FILE);
-  if (!existsSync(path)) return null;
-  try {
-    const text = readFileSync(path, "utf8");
-    for (const raw of text.split(/\r?\n/)) {
-      const line = raw.trim();
-      if (!line || line.startsWith("#")) continue;
-      return DOOR_TEMPLATE_URL_RE.test(line) ? line : null;
+  if (existsSync(path)) {
+    try {
+      const text = readFileSync(path, "utf8");
+      for (const raw of text.split(/\r?\n/)) {
+        const line = raw.trim();
+        if (!line || line.startsWith("#")) continue;
+        if (DOOR_TEMPLATE_URL_RE.test(line)) return line;
+      }
+    } catch {
+      /* fall through */
     }
-    return null;
-  } catch {
-    return null;
   }
+  return DOOR_TEMPLATE_URL_RE.test(DOOR_TEMPLATE_URL) ? DOOR_TEMPLATE_URL : null;
 }
 
 export const PULSE_STALE_MS = 6 * 60 * 60_000; // stay seated while this chat is open

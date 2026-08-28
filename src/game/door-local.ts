@@ -1,3 +1,4 @@
+import { DOOR_TEMPLATE_URL } from "@/lib/bot/door-template";
 import type { ChatLine, GrokBotChoice, SessionPayload } from "@/lib/bot/types";
 
 /** Same Door id as grok-bots.ts. Picker: Citadel Door only. */
@@ -65,7 +66,7 @@ function view(store: Store): SessionPayload {
     landables: store.landables,
     bots: [DOOR_BOT],
     chat: store.chat,
-    door_template_url: null,
+    door_template_url: DOOR_TEMPLATE_URL,
   };
 }
 
