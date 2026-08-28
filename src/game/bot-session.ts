@@ -1,21 +1,44 @@
 import { getBearerToken } from "@/lib/auth/client";
 import type { GrokBotChoice, Landable, SessionPayload } from "@/lib/bot/types";
+import { doorLocalResponse, withDoorBots } from "./door-local";
 
 export type { GrokBotChoice, Landable, SessionPayload };
 
-async function botFetch(init: RequestInit & { op?: string } = {}): Promise<Response> {
+function isJson(res: Response): boolean {
+  return (res.headers.get("content-type") || "").includes("application/json");
+}
+
+async function botFetch(init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
   const token = getBearerToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init.body && !headers.has("content-type")) headers.set("content-type", "application/json");
-  return fetch("/api/bot", { ...init, headers, credentials: "include" });
+  const extra = String(import.meta.env.VITE_BOT_API || "").trim();
+  const urls = extra ? [extra.replace(/\/$/, ""), "/api/bot"] : ["/api/bot"];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { ...init, headers, credentials: "include" });
+      if (isJson(res)) return res;
+    } catch {
+      /* Pages / offline — fall through */
+    }
+  }
+  return doorLocalResponse(init);
 }
 
 async function readPayload(res: Response): Promise<SessionPayload & { error?: string }> {
   try {
-    return (await res.json()) as SessionPayload & { error?: string };
+    const body = (await res.json()) as SessionPayload & { error?: string };
+    return withDoorBots(body);
   } catch {
-    return { session: null, den: null, landables: [], bots: [], door_template_url: null, error: "Could not read Grok Bot session." };
+    return withDoorBots({
+      session: null,
+      den: null,
+      landables: [],
+      bots: [],
+      door_template_url: null,
+      error: "Could not read Grok Bot session.",
+    });
   }
 }
 
@@ -32,7 +55,9 @@ export async function connectBot(choice: { bot_id: string; bot_name: string }): 
 
 export async function fetchBotSession(): Promise<SessionPayload> {
   const res = await botFetch({ method: "GET" });
-  if (!res.ok) return { session: null, den: null, landables: [], bots: [], door_template_url: null };
+  if (!res.ok) {
+    return withDoorBots({ session: null, den: null, landables: [], bots: [], door_template_url: null });
+  }
   return readPayload(res);
 }
 
@@ -62,7 +87,7 @@ export async function disconnectBot(): Promise<{ ok: boolean; error?: string }> 
   return { ok: true };
 }
 
-/** Player line to the connected Grok Bot. No canned reply. */
+/** Player line to the connected Grok Bot. Never send an API key. */
 export async function sendBotChat(text: string): Promise<SessionPayload & { error?: string }> {
   const res = await botFetch({
     method: "POST",
