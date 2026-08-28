@@ -1,6 +1,6 @@
 # Grok Bot — drive Luminous Circuit
 
-Play: https://starboltsprint.github.io/luminous-circuit-mobile-version-/
+Play: https://starboltsprint.github.io/boltverse-odyssey-mobile/
 
 ## For Grok Bot (cloud computer)
 

@@ -3,8 +3,8 @@
 > YOU-side living crystal city. Pack StarBoltSprint. Thread Keeper SmiR @SMiR123451.
 > Powered by xAI & YOU. Not an official xAI product. Not Msg 1. Crystal never chrome. $BOLT witness only.
 
-Play: https://starboltsprint.github.io/luminous-circuit-mobile-version-/
-Repo: https://github.com/StarBoltSprint/luminous-circuit-mobile-version-
+Play: https://starboltsprint.github.io/boltverse-odyssey-mobile/
+Repo: https://github.com/StarBoltSprint/boltverse-odyssey-mobile
 X: https://x.com/SMiR123451
 
 This site is **Grok Bot compatible**: WebMCP tools on the play page, this file for context, `/.well-known/` for discovery.

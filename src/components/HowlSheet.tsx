@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { pub } from "@/lib/pub";
 import { MAX_REMIX, MAX_WISH, type ForgeTheme, type RemixBuilding, type RemixWorld } from "@/game/forged";
 import { loadForge, writeForge } from "@/game/forge-save";
 
@@ -137,7 +138,7 @@ export function HowlSheet({ onClose, onLand }: Props) {
         {tab === "pick" && (
           <>
             <div className="forge-crest-wrap" aria-hidden>
-              <img className="forge-crest" src="/forge/kiln.jpg" alt="" />
+              <img className="forge-crest" src={pub("forge/kiln.jpg")} alt="" />
             </div>
             <p className="citadel-kicker">Kiln</p>
             <h2 className="citadel-sheet-title">Forge</h2>
@@ -145,7 +146,7 @@ export function HowlSheet({ onClose, onLand }: Props) {
             <div className="forge-doors">
               <button type="button" className="forge-door" data-open="true" onClick={() => setTab("remix")}>
                 <span className="forge-door-art">
-                  <img src="/forge/remix.jpg" alt="" />
+                  <img src={pub("forge/remix.jpg")} alt="" />
                   <span className="hall-ribbon">Open</span>
                   <span className="hall-badge" data-open="true">
                     Land
@@ -156,7 +157,7 @@ export function HowlSheet({ onClose, onLand }: Props) {
               </button>
               <button type="button" className="forge-door" onClick={() => setTab("engine")}>
                 <span className="forge-door-art">
-                  <img src="/forge/engine.jpg" alt="" />
+                  <img src={pub("forge/engine.jpg")} alt="" />
                   <span className="hall-ribbon">Sealed</span>
                   <span className="hall-badge">Howl</span>
                 </span>
@@ -179,7 +180,7 @@ export function HowlSheet({ onClose, onLand }: Props) {
             }}
           >
             <div className="forge-inner-art" aria-hidden>
-              <img src="/forge/remix.jpg" alt="" />
+              <img src={pub("forge/remix.jpg")} alt="" />
             </div>
             <p className="citadel-kicker">Remix · Circuit</p>
             <h2 className="citadel-sheet-title">Howl a city</h2>
@@ -206,7 +207,7 @@ export function HowlSheet({ onClose, onLand }: Props) {
         {tab === "remix" && phase !== "ask" && (
           <div className="forge-inner">
             <div className="forge-inner-art" data-live="true" aria-hidden>
-              <img src="/forge/remix.jpg" alt="" />
+              <img src={pub("forge/remix.jpg")} alt="" />
               <span className="forge-heat" />
             </div>
             <p className="citadel-kicker">{draft.theme || "remixing"} · circuit</p>
@@ -239,7 +240,7 @@ export function HowlSheet({ onClose, onLand }: Props) {
         {tab === "engine" && (
           <div className="forge-inner">
             <div className="forge-inner-art" aria-hidden>
-              <img src="/forge/engine.jpg" alt="" />
+              <img src={pub("forge/engine.jpg")} alt="" />
             </div>
             <p className="citadel-kicker">New Engine</p>
             <h2 className="citadel-sheet-title">Sealed kiln</h2>

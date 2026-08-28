@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Castle, Flame, Music, Music2, Star, Volume2 } from "lucide-react";
 import { createCitadelTheme, type CitadelTheme } from "@/game/citadel-theme";
+import { pub } from "@/lib/pub";
 import { GrokBotSlit } from "./GrokBotSlit";
 import { HowlSheet } from "./HowlSheet";
 import { PackChip, PackSheet } from "./PackMark";
@@ -109,12 +110,12 @@ export function CitadelHub({ onHall, onConstellation, onLand }: Props) {
       data-song={muted ? undefined : "on"}
       aria-label="Thunderwolf Citadel"
     >
-      <img className="citadel-art" src="/citadel/hub.jpg" alt="" hidden={live} />
+      <img className="citadel-art" src={pub("citadel/hub.jpg")} alt="" hidden={live} />
       {!reduce && (
         <video
           className="citadel-art citadel-live"
-          src="/citadel/hub.mp4"
-          poster="/citadel/hub.jpg"
+          src={pub("citadel/hub.mp4")}
+          poster={pub("citadel/hub.jpg")}
           autoPlay
           muted
           loop

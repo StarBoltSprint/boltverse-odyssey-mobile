@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { pub } from "@/lib/pub";
 import { loadNames } from "@/game/civic";
 import { loadChanges } from "@/game/city-change";
 import type { SessionPayload } from "@/game/bot-session";
@@ -32,7 +33,7 @@ export function RaisingDock({
           onClick={() => toggle("map")}
         >
           <span className="raising-tab-face">
-            <img src="/ui/tab-map.jpg" alt="" />
+            <img src={pub("ui/tab-map.jpg")} alt="" />
           </span>
           Map
         </button>
@@ -43,7 +44,7 @@ export function RaisingDock({
           onClick={() => toggle("lineage")}
         >
           <span className="raising-tab-face">
-            <img src="/ui/tab-lineage.jpg" alt="" />
+            <img src={pub("ui/tab-lineage.jpg")} alt="" />
           </span>
           Lineage
         </button>
@@ -54,7 +55,7 @@ export function RaisingDock({
           onClick={() => toggle("remix")}
         >
           <span className="raising-tab-face">
-            <img src="/ui/tab-remix.jpg" alt="" />
+            <img src={pub("ui/tab-remix.jpg")} alt="" />
           </span>
           Remix
         </button>
@@ -65,7 +66,7 @@ export function RaisingDock({
           onClick={() => toggle("bot")}
         >
           <span className="raising-tab-face">
-            <img src="/ui/tab-grok.jpg" alt="" />
+            <img src={pub("ui/tab-grok.jpg")} alt="" />
           </span>
           Grok
         </button>
