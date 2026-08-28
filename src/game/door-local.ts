@@ -8,11 +8,7 @@ export const DOOR_BOT: GrokBotChoice = {
 };
 
 const KEY = "odyssey-door-slit";
-const RE_HI = /\b(hi|hey|hello|here|u there|you there|yo)\b/i;
-const RE_HOW = /\b(how are|what.?s up|wyd|doing)\b/i;
-const RE_PLAY = /\b(play|circuit|howl|walk|game|door|citadel)\b/i;
-const RE_Q = /\?|\b(what|who|how|why|where)\b/i;
-const NOISE = new Set(["p", "lol", "lmao", "ok", "k", "kk", "yo", "haha"]);
+
 
 type Store = {
   session: SessionPayload["session"];
@@ -74,23 +70,6 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function pickDoorLine(text: string, recent: string[]): string {
-  let bank: string[];
-  if (RE_HI.test(text) && !RE_HOW.test(text)) {
-    bank = ["Here. On the door.", "Yes. I hear you.", "Present. Say it."];
-  } else if (RE_HOW.test(text)) {
-    bank = ["On the door. Local. No quota.", "Here. Watching the slit.", "Good. You?"];
-  } else if (RE_PLAY.test(text)) {
-    bank = ["Play copy is local. I'm on this door.", "Citadel door. I have the line.", "Say what you want on this copy."];
-  } else if (RE_Q.test(text)) {
-    bank = ["Ask it straight. I'm local on this door.", "I can answer here. Short.", "Go."];
-  } else {
-    bank = ["Heard. Go on.", "On it. Local.", "Yes.", "Got it. Next."];
-  }
-  const hit = bank.find((line) => !recent.includes(line));
-  return hit ?? bank[0];
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -124,7 +103,7 @@ export function doorLocalResponse(init: RequestInit = {}): Response {
       mode: "stay",
       current_artifact_id: store.den?.artifact_id ?? "pack-hq",
       owner_id: "phone",
-      activity: "on the door",
+      activity: "waiting for Citadel Door",
       oauth: "stub",
     };
     store.chat = [];
@@ -154,26 +133,21 @@ export function doorLocalResponse(init: RequestInit = {}): Response {
     return json(view(store));
   }
 
-  if (op === "chat" || op === "say") {
+  if (op === "chat") {
     const text = String(rec.text || "").trim().slice(0, 240);
     if (!text) return json({ error: "text is required." }, 400);
-    const at = nowIso();
-    if (op === "chat") {
-      store.chat.push({ from: "player", text, at });
-      const quiet = NOISE.has(text.toLowerCase()) || text.length <= 1;
-      if (!quiet) {
-        const recent = store.chat.filter((l) => l.from === "bot").map((l) => l.text).slice(-8);
-        store.chat.push({
-          from: "bot",
-          text: pickDoorLine(text, recent),
-          at: new Date(Date.now() + 400).toISOString(),
-        });
-        store.session.activity = "answering you on the door";
-      }
-    } else {
-      store.chat.push({ from: "bot", text, at });
-    }
+    store.chat.push({ from: "player", text, at: nowIso() });
     store.chat = store.chat.slice(-40);
+    store.session.activity = "waiting for Citadel Door";
+    save(store);
+    return json(view(store));
+  }
+  if (op === "say") {
+    const text = String(rec.text || "").trim().slice(0, 240);
+    if (!text) return json({ error: "text is required." }, 400);
+    store.chat.push({ from: "bot", text, at: nowIso() });
+    store.chat = store.chat.slice(-40);
+    store.session.activity = "on the door";
     save(store);
     return json(view(store));
   }

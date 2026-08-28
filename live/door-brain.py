@@ -175,16 +175,10 @@ def main() -> None:
                         pulse(bot_id, bot_name, "on the door")
                         log("skip noise %s" % player)
                         continue
-                    reply = pick(bot_name, player, recent)[:240]
-                    t0 = time.time()
-                    out = post("say", text=reply)
-                    ms = int((time.time() - t0) * 1000)
-                    recent.append(reply)
-                    recent = recent[-8:]
-                    pulse(bot_id, bot_name, "answering you on the door")
+                    # Do not impersonate Citadel Door. The real Grok Bot answers via wake / MCP.
+                    pulse(bot_id, bot_name, "waiting for Citadel Door")
                     last_pulse = time.time()
-                    log("say bot=%s in=%s out=%s ms=%s ok=%s" % (
-                        bot_name, player[:80], reply, ms, bool(out)))
+                    log("hold for real door bot=%s in=%s" % (bot_name, player[:80]))
             now = time.time()
             if last_bot[0] and now - last_pulse >= 20:
                 pulse(last_bot[0], last_bot[1], "on the door")
