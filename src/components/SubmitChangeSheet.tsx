@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { EngineHandle } from "@/game/engine";
 import { setLive } from "@/game/bolt-brain";
 import {
   buildChange,
@@ -20,7 +19,13 @@ export function SubmitChangeSheet({
   pz,
   onClose,
 }: {
-  engine: EngineHandle | null;
+  engine: {
+    previewVision?: (pieces: CityChange["pieces"]) => void;
+    previewGraphic?: (graphic: CityChange["graphic"]) => void;
+    applyBrainPack?: (pack: CityChange["pack"]) => void;
+    acceptPieces?: (pieces: CityChange["pieces"], line: string) => void;
+    clearVision?: () => void;
+  } | null;
   px: number;
   pz: number;
   onClose: () => void;
@@ -35,16 +40,16 @@ export function SubmitChangeSheet({
   function applyPreview(row: CityChange) {
     setChangePreview(row);
     setPrev(row);
-    if (row.pieces.length) engine?.previewVision(row.pieces);
-    engine?.previewGraphic(row.graphic);
-    if (row.pack) engine?.applyBrainPack(row.pack);
+    if (row.pieces.length) engine?.previewVision?.(row.pieces);
+    engine?.previewGraphic?.(row.graphic);
+    if (row.pack) engine?.applyBrainPack?.(row.pack);
   }
 
   function clearPreview() {
     setChangePreview(null);
     setPrev(null);
-    engine?.clearVision();
-    engine?.applyBrainPack(null);
+    engine?.clearVision?.();
+    engine?.applyBrainPack?.(null);
   }
 
   async function submit(source: CityChange["source"]) {
@@ -177,10 +182,10 @@ export function SubmitChangeSheet({
                     onClick={() => {
                       const live = markChangeLive(r.id);
                       if (!live) return;
-                      if (live.pieces.length) engine?.acceptPieces(live.pieces, live.wish);
+                      if (live.pieces.length) engine?.acceptPieces?.(live.pieces, live.wish);
                       if (live.pack) setLive(live.pack);
-                      engine?.applyBrainPack(live.pack);
-                      engine?.clearVision();
+                      engine?.applyBrainPack?.(live.pack);
+                      engine?.clearVision?.();
                       setQueue(loadChanges());
                       setPrev(null);
                     }}

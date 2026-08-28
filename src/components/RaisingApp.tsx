@@ -1,21 +1,38 @@
 import { useEffect, useRef, useState } from "react";
+import { ARTIFACTS, type ArtifactId } from "@/game/artifacts";
 import type { RaisingHandle, RaisingHud } from "@/game/raising-engine";
+import type { SkyHandle, SkyHud } from "@/game/constellation-engine";
+import { fetchBotSession, type SessionPayload } from "@/game/bot-session";
+import { ArtifactHall } from "./ArtifactHall";
+import { CitadelHub } from "./CitadelHub";
+import { RaisingDock } from "./RaisingDock";
 
-const EMPTY: RaisingHud = { mode: "title", toast: null };
+const EMPTY: RaisingHud = { mode: "title", toast: null, lookX: 0, lookZ: 0 };
+const SKY_EMPTY: SkyHud = { pick: null, toast: null, view: "constellation" };
+
+type Place = "citadel" | "hall" | "sky" | "circuit";
 
 export function RaisingApp() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<RaisingHandle | null>(null);
+  const skyRef = useRef<SkyHandle | null>(null);
+  const [place, setPlace] = useState<Place>("citadel");
   const [hud, setHud] = useState<RaisingHud>(EMPTY);
+  const [skyHud, setSkyHud] = useState<SkyHud>(SKY_EMPTY);
   const [bootError, setBootError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [bot, setBot] = useState<SessionPayload>({ session: null, den: null, landables: [], bots: [], door_template_url: null });
 
   useEffect(() => {
+    void fetchBotSession().then(setBot);
+  }, []);
+
+  useEffect(() => {
+    if (place === "citadel" || place === "hall") return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const bag = window as unknown as {
-      __LC_ENGINE?: RaisingHandle;
+      __LC_ENGINE?: { dispose: () => void };
       __LC_BOOTED?: boolean;
       __LC_LAND?: () => void;
       __RAISING?: boolean;
@@ -31,75 +48,160 @@ export function RaisingApp() {
       bag.__LC_BOOTED = false;
       bag.__RAISING = false;
     }
-    const adopt = (handle: RaisingHandle) => {
-      engineRef.current = handle;
-      bag.__LC_ENGINE = handle;
-      bag.__LC_BOOTED = true;
-      bag.__RAISING = true;
-      bag.__LC_LAND = () => handle.land();
-      setBootError(null);
-      setReady(true);
-    };
-    const start = () => {
-      if (disposed) return;
+    engineRef.current = null;
+    skyRef.current = null;
+
+    if (place === "sky") {
+      import("@/game/constellation-engine")
+        .then(({ startSky }) => {
+          if (disposed || !canvasRef.current) return;
+          try {
+            const handle = startSky(canvasRef.current, setSkyHud, () => setPlace("circuit"));
+            skyRef.current = handle;
+            bag.__LC_ENGINE = handle;
+            bag.__LC_BOOTED = true;
+            bag.__RAISING = true;
+            setBootError(null);
+          } catch (err) {
+            setBootError(err instanceof Error ? err.message : "The sky failed to wake.");
+          }
+        })
+        .catch((err) => {
+          if (!disposed) setBootError(err instanceof Error ? err.message : "The sky failed to wake.");
+        });
+    } else {
       import("@/game/raising-engine")
         .then(({ startRaising }) => {
           if (disposed || !canvasRef.current) return;
           try {
-            adopt(startRaising(canvasRef.current, setHud));
+            const handle = startRaising(canvasRef.current, setHud);
+            engineRef.current = handle;
+            bag.__LC_ENGINE = handle;
+            bag.__LC_BOOTED = true;
+            bag.__RAISING = true;
+            bag.__LC_LAND = () => handle.land();
+            setBootError(null);
+            handle.land();
+            handle.audio.setMuted(muted);
           } catch (err) {
             engineRef.current = null;
             setBootError(err instanceof Error ? err.message : "The raising failed to wake.");
           }
         })
         .catch((err) => {
-          if (!disposed) {
-            setBootError(err instanceof Error ? err.message : "The raising failed to wake.");
-          }
+          if (!disposed) setBootError(err instanceof Error ? err.message : "The raising failed to wake.");
         });
-    };
-    const id = window.setTimeout(start, 20);
+    }
+
     return () => {
       disposed = true;
-      window.clearTimeout(id);
+      try {
+        bag.__LC_ENGINE?.dispose();
+      } catch {
+        /* unmount */
+      }
+      bag.__LC_ENGINE = undefined;
     };
-  }, []);
+  }, [place]);
 
-  function playNow() {
-    const eng = engineRef.current;
-    if (!eng) return;
-    try {
-      eng.land();
-    } catch {
-      /* samsung */
-    }
+  const playing = place === "circuit" && hud.mode === "play";
+  const paused = place === "circuit" && hud.mode === "pause";
+  const onSky = place === "sky" && !bootError;
+  const pick = skyHud.pick;
+
+  function landFromHall(_id: ArtifactId) {
+    setPlace("circuit");
   }
-
-  const onTitle = hud.mode === "title" && !bootError;
-  const playing = hud.mode === "play";
-  const paused = hud.mode === "pause";
 
   return (
     <div className="circuit-root raising-root">
-      <canvas
-        ref={canvasRef}
-        className="circuit-canvas z-0"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          display: "block",
-          background: "#5aa4dc",
-          touchAction: "none",
-          pointerEvents: playing || paused ? "auto" : "none",
-        }}
-      />
+      {(place === "sky" || place === "circuit") && (
+        <canvas
+          ref={canvasRef}
+          className="circuit-canvas z-0"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            display: "block",
+            background: "#070918",
+            touchAction: "none",
+            pointerEvents: onSky || playing || paused ? "auto" : "none",
+          }}
+        />
+      )}
 
-      <div className="pointer-events-none absolute inset-0 z-10 hud-safe flex flex-col">
-        {playing && (
+      {place === "citadel" && !bootError && (
+        <CitadelHub
+          onHall={() => setPlace("hall")}
+          onConstellation={() => setPlace("sky")}
+          onLand={() => setPlace("circuit")}
+        />
+      )}
+
+      {place === "hall" && !bootError && (
+        <ArtifactHall
+          onLand={landFromHall}
+          onConstellation={() => setPlace("sky")}
+          onHome={() => setPlace("citadel")}
+        />
+      )}
+
+      {onSky && (
+        <div className="pointer-events-none absolute inset-0 z-10 hud-safe flex flex-col">
+          <header className="raising-head raising-head-hall">
+            <p className="raising-kicker">Boltverse</p>
+            <div className="raising-toggle hall-toggle pointer-events-auto" role="tablist" aria-label="Sky view">
+              <button type="button" role="tab" aria-selected={false} onClick={() => setPlace("citadel")}>
+                Citadel
+              </button>
+              <button type="button" role="tab" aria-selected="true" data-on="true">
+                Stars
+              </button>
+            </div>
+          </header>
+          <div className="flex-1 relative min-h-0">
+            {skyHud.toast && <p className="raising-toast">{skyHud.toast}</p>}
+          </div>
+          <div className="raising-sky-card pointer-events-auto">
+            <div className="raising-relics" role="listbox" aria-label="Worlds">
+              {ARTIFACTS.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  role="option"
+                  aria-selected={pick?.id === a.id}
+                  aria-label={a.name}
+                  data-id={a.id}
+                  data-on={pick?.id === a.id ? "true" : undefined}
+                  data-open={a.open ? "true" : undefined}
+                  className="raising-relic"
+                  onClick={() => skyRef.current?.select(a.id)}
+                >
+                  <span className="raising-relic-dot" data-id={a.id} />
+                </button>
+              ))}
+            </div>
+            <p className="raising-sky-name">{pick?.name ?? "Constellation"}</p>
+            <p className="raising-sky-line">{pick?.line ?? "Swipe the sky. Tap a star."}</p>
+            {pick?.open ? (
+              <button type="button" className="raising-play" onClick={() => setPlace("circuit")}>
+                Land
+              </button>
+            ) : (
+              <p className="raising-sky-wait">Sealed</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {playing && (
+        <div className="pointer-events-none absolute inset-0 z-10 hud-safe flex flex-col">
           <header className="raising-head">
-            <p className="raising-kicker">Year 0</p>
+            <button type="button" className="raising-mute pointer-events-auto" onClick={() => setPlace("citadel")}>
+              Citadel
+            </button>
             <p className="raising-title">Core Spire</p>
             <button
               type="button"
@@ -114,42 +216,22 @@ export function RaisingApp() {
               {muted ? "Sound" : "Mute"}
             </button>
           </header>
-        )}
-
-        <div className="flex-1 relative min-h-0">
-          {playing && hud.toast && <p className="raising-toast">{hud.toast}</p>}
-        </div>
-      </div>
-
-      {onTitle && (
-        <div className="raising-gate">
-          <div className="raising-gate-copy">
-            <p className="raising-gate-kicker">Year 0</p>
-            <h1 className="raising-gate-title">
-              The Luminous
-              <br />
-              Circuit
-            </h1>
-            <p className="raising-gate-sub">Core Spire</p>
-          </div>
-          <div className="raising-gate-actions">
-            <button
-              type="button"
-              className="raising-play"
-              disabled={!ready}
-              onClick={playNow}
-            >
-              {ready ? "Play" : "Loading"}
-            </button>
+          <div className="flex-1 relative min-h-0">
+            {hud.toast && <p className="raising-toast">{hud.toast}</p>}
+            {bot.session ? (
+              <p className="hud-slim-duty">{bot.session.activity}</p>
+            ) : null}
           </div>
         </div>
       )}
 
+      {playing && <RaisingDock lookX={hud.lookX} lookZ={hud.lookZ} onBotSession={setBot} />}
+
       {bootError && (
         <div className="raising-gate">
           <div className="raising-gate-copy">
-            <p className="raising-gate-kicker">Year 0</p>
-            <h1 className="raising-gate-title">The Luminous Circuit</h1>
+            <p className="raising-gate-kicker">Boltverse</p>
+            <h1 className="raising-gate-title">The hall failed</h1>
             <p className="raising-gate-sub">{bootError}</p>
           </div>
           <div className="raising-gate-actions">
@@ -165,7 +247,6 @@ export function RaisingApp() {
           <div className="pause-sheet">
             <div className="panel w-[min(92%,22rem)] px-6 py-6">
               <h2 className="hud-title text-2xl">Paused</h2>
-              <p className="mt-1 text-sm text-muted">The first raising waits.</p>
               <div className="mt-5 flex flex-col gap-2">
                 <button
                   type="button"
@@ -173,6 +254,9 @@ export function RaisingApp() {
                   onClick={() => engineRef.current?.setMode("play")}
                 >
                   Resume
+                </button>
+                <button type="button" className="hud-chip h-11 rounded-lg" onClick={() => setPlace("citadel")}>
+                  Citadel
                 </button>
               </div>
             </div>

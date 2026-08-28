@@ -7,9 +7,9 @@ import "../styles.css";
 const APP_NAME = "The Luminous Circuit";
 
 const CRITICAL = `
-html,body,#app{height:100%;margin:0;background:#5aa4dc;color:#e8eef8;font-family:system-ui,sans-serif}
-.circuit-root{position:relative;width:100%;height:100dvh;height:100svh;background:#5aa4dc;overflow:hidden;color:#e8eef8;font-family:system-ui,sans-serif}
-.circuit-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;background:#5aa4dc;touch-action:none}
+html,body,#app{height:100%;margin:0;background:#070918;color:#e8eef8;font-family:system-ui,sans-serif}
+.circuit-root{position:relative;width:100%;height:100dvh;height:100svh;background:#070918;overflow:hidden;color:#e8eef8;font-family:system-ui,sans-serif}
+.circuit-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;background:#070918;touch-action:none}
 `;
 
 export const Route = createRootRoute({
@@ -22,7 +22,7 @@ export const Route = createRootRoute({
           "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no",
       },
       { title: APP_NAME },
-      { name: "theme-color", content: "#5aa4dc" },
+      { name: "theme-color", content: "#070918" },
       { name: "color-scheme", content: "dark" },
       { name: "format-detection", content: "telephone=no" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -31,12 +31,12 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Year 0. Walk the first Core Spire — one stylized crystal raising. No city, no map.",
+          "Thunderwolf Citadel — Pack HQ. Land the Circuit, open the Hall of Artifacts, or fly the constellation.",
       },
       {
         name: "agent-capabilities",
         content:
-          "Land at the first Core Spire. Swipe to look. Pinch to zoom.",
+          "Open the Citadel hub. Land the Circuit. Open Hall of Artifacts. Toggle the constellation sky.",
       },
     ],
     links: [

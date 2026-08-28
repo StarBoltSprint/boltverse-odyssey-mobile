@@ -6,6 +6,8 @@ import { buildRaising } from "./raising-world";
 export type RaisingHud = {
   mode: "title" | "play" | "pause";
   toast: string | null;
+  lookX: number;
+  lookZ: number;
 };
 
 export type RaisingHandle = {
@@ -106,6 +108,8 @@ export function startRaising(
     onHud({
       mode,
       toast,
+      lookX,
+      lookZ,
     });
   }
 

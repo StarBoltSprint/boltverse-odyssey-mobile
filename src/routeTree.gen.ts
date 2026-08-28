@@ -10,12 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ApiBotRouteImport } from './routes/api/bot'
+import { Route as ApiForgeRouteImport } from './routes/api/forge'
 import { Route as ApiRtcRouteImport } from './routes/api/rtc'
 import { Route as ApiVisionsRouteImport } from './routes/api/visions'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotRoute = ApiBotRouteImport.update({
+  id: '/api/bot',
+  path: '/api/bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiForgeRoute = ApiForgeRouteImport.update({
+  id: '/api/forge',
+  path: '/api/forge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiRtcRoute = ApiRtcRouteImport.update({
@@ -28,35 +47,78 @@ const ApiVisionsRoute = ApiVisionsRouteImport.update({
   path: '/api/visions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/api/bot': typeof ApiBotRoute
+  '/api/forge': typeof ApiForgeRoute
   '/api/rtc': typeof ApiRtcRoute
   '/api/visions': typeof ApiVisionsRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/api/bot': typeof ApiBotRoute
+  '/api/forge': typeof ApiForgeRoute
   '/api/rtc': typeof ApiRtcRoute
   '/api/visions': typeof ApiVisionsRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/api/bot': typeof ApiBotRoute
+  '/api/forge': typeof ApiForgeRoute
   '/api/rtc': typeof ApiRtcRoute
   '/api/visions': typeof ApiVisionsRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/rtc' | '/api/visions'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/api/bot'
+    | '/api/forge'
+    | '/api/rtc'
+    | '/api/visions'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/rtc' | '/api/visions'
-  id: '__root__' | '/' | '/api/rtc' | '/api/visions'
+  to:
+    | '/'
+    | '/login'
+    | '/api/bot'
+    | '/api/forge'
+    | '/api/rtc'
+    | '/api/visions'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/api/bot'
+    | '/api/forge'
+    | '/api/rtc'
+    | '/api/visions'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  ApiBotRoute: typeof ApiBotRoute
+  ApiForgeRoute: typeof ApiForgeRoute
   ApiRtcRoute: typeof ApiRtcRoute
   ApiVisionsRoute: typeof ApiVisionsRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +128,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot': {
+      id: '/api/bot'
+      path: '/api/bot'
+      fullPath: '/api/bot'
+      preLoaderRoute: typeof ApiBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/forge': {
+      id: '/api/forge'
+      path: '/api/forge'
+      fullPath: '/api/forge'
+      preLoaderRoute: typeof ApiForgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/rtc': {
@@ -82,13 +165,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVisionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  ApiBotRoute: ApiBotRoute,
+  ApiForgeRoute: ApiForgeRoute,
   ApiRtcRoute: ApiRtcRoute,
   ApiVisionsRoute: ApiVisionsRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

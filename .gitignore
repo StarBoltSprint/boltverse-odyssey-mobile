@@ -1,5 +1,7 @@
 node_modules
 dist
+.vite
+coverage
 .vercel
 .tanstack
 .grok
@@ -14,4 +16,25 @@ screenshots
 artifacts
 attachments
 *.log
+*.pid
 .DS_Store
+__pycache__/
+*.pyc
+
+# Live connector secrets and local session files — never commit
+live/wake-url.txt
+live/wake-key.txt
+live/wake-stamp.txt
+live/wake-miss.txt
+live/inbox.jsonl
+live/inbox-read.json
+live/summon.json
+live/watch-offset.txt
+live/door-offset.txt
+live/door-template-url.txt
+live/chat-*.json
+live/*.json
+live/wakes/*.url
+live/wakes/*.key
+live/wakes/default-key.txt
+live/wakes/default.url

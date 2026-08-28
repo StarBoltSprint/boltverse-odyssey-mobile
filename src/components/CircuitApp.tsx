@@ -30,6 +30,7 @@ import { fetchVisions, proposeVision, decideVision, type Vision } from "@/game/v
 import { buzz } from "@/game/haptics";
 import { loadChain, needleDeg, talkWitness } from "@/game/play";
 import { bindAgentHandle, installWebMcp } from "@/game/webmcp";
+import { fetchBotSession, type SessionPayload } from "@/game/bot-session";
 import { GrokBotSignIn } from "./GrokBotSignIn";
 import { BotRelay } from "./BotRelay";
 import { BrainSheet } from "./BrainSheet";
@@ -150,6 +151,7 @@ export function CircuitApp() {
   const [joinOpen, setJoinOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [botOpen, setBotOpen] = useState(false);
+  const [bot, setBot] = useState<SessionPayload>({ session: null, den: null, landables: [], bots: [], door_template_url: null });
   const [brainOpen, setBrainOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [inhabitOpen, setInhabitOpen] = useState(false);
@@ -191,6 +193,7 @@ export function CircuitApp() {
     } catch {
       /* samsung */
     }
+    void fetchBotSession().then(setBot);
   }, []);
 
   useEffect(() => {
@@ -494,18 +497,19 @@ export function CircuitApp() {
             <button type="button" className="hud-more-item" onClick={() => { setMoreOpen(false); setLogOpen(false); setJoinOpen(true); }}>Join</button>
             <button type="button" className="hud-more-item" onClick={() => { const next = !muted; setMuted(next); engineRef.current?.audio.setMuted(next); }}>{muted ? "Sound" : "Mute"}</button>
             <button type="button" className="hud-more-item" onClick={() => engineRef.current?.setMode(playing ? "pause" : "play")}>{paused ? "Resume" : "Pause"}</button>
-            <button type="button" className="hud-more-item" onClick={() => { setMoreOpen(false); setBotOpen(true); }}>Sign in with Grok Bot</button>
+            <button type="button" className="hud-more-item" onClick={() => { setMoreOpen(false); setBotOpen(true); }}>Connect Grok Bot</button>
             <button type="button" className="hud-more-item" onClick={() => { setMoreOpen(false); setBrainOpen(true); }}>Bolt Brain</button>
           </div>
         )}
 
         {playing && !logOpen && !joinOpen && !moreOpen && !hud.toast && (
           <p className="hud-slim-duty">
-            {loadChangePreview()
-              ? `PREVIEW · ${loadChangePreview()?.author}: ${loadChangePreview()?.wish.slice(0, 48)}`
-              : loadPreview()
-                ? `PREVIEW · ${loadPreview()?.author}'s Bolt brain · not live`
-                : walkLine}
+            {bot.session?.activity
+              || (loadChangePreview()
+                ? `PREVIEW · ${loadChangePreview()?.author}: ${loadChangePreview()?.wish.slice(0, 48)}`
+                : loadPreview()
+                  ? `PREVIEW · ${loadPreview()?.author}'s Bolt brain · not live`
+                  : walkLine)}
           </p>
         )}
 
@@ -602,7 +606,7 @@ export function CircuitApp() {
             onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); setBotOpen(true); }}
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); setBotOpen(true); }}
           >
-            Sign in with Grok Bot
+            Connect Grok Bot
           </span>
         </button>
       )}
@@ -888,7 +892,7 @@ export function CircuitApp() {
           </div>
         </div>
       )}
-      {botOpen && <GrokBotSignIn onClose={() => setBotOpen(false)} />}
+      {botOpen && <GrokBotSignIn onClose={() => setBotOpen(false)} onSession={setBot} />}
       {brainOpen && <BrainSheet engine={engineRef.current} onClose={() => setBrainOpen(false)} />}
       {submitOpen && (
         <SubmitChangeSheet
