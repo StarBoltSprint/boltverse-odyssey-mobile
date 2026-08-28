@@ -4397,6 +4397,259 @@ video.citadel-live {
     opacity: 1;
   }
 }
+
+/* Fullscreen Door hall — phone first. */
+.citadel-slit[data-full="true"] {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border-radius: 0;
+  overflow: hidden;
+  color: var(--color-fg);
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in oklab, var(--color-gold) 22%, transparent), transparent 55%),
+    radial-gradient(90% 50% at 80% 110%, color-mix(in oklab, var(--color-accent) 16%, transparent), transparent 50%),
+    linear-gradient(180deg, #16110c 0%, #07080e 42%, #05060a 100%);
+  box-shadow: none;
+  padding-bottom: var(--slit-kb, 0px);
+}
+.citadel-slit[data-full="true"] .citadel-slit-pick,
+.citadel-slit[data-full="true"] .citadel-slit-on {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 14px)
+    max(16px, env(safe-area-inset-right, 0px))
+    calc(env(safe-area-inset-bottom, 0px) + 12px)
+    max(16px, env(safe-area-inset-left, 0px));
+}
+.citadel-slit-hall-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+.citadel-slit-hall-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.citadel-slit-kicker {
+  margin: 0;
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+.citadel-slit-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: #f6e7b8;
+}
+.citadel-slit-sub {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--color-muted);
+}
+.citadel-slit[data-full="true"] .citadel-slit-live {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.citadel-slit[data-full="true"] .citadel-slit-live strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  color: #f6e7b8;
+  white-space: normal;
+}
+.citadel-slit[data-full="true"] .citadel-slit-live em {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  white-space: normal;
+  overflow: visible;
+}
+.citadel-slit-icon {
+  appearance: none;
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-gold) 14%, #120e0a);
+  color: var(--color-gold);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-gold) 45%, transparent);
+}
+.citadel-slit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.citadel-slit[data-full="true"] .citadel-slit-travel,
+.citadel-slit[data-full="true"] .citadel-slit-cut {
+  flex: 1 1 auto;
+  margin: 0;
+  min-height: 44px;
+  border-radius: 14px;
+  font-size: 0.72rem;
+}
+.citadel-slit[data-full="true"] .citadel-slit-import {
+  padding: 16px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--color-gold) 28%, #1a140c), #14100c);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-gold) 55%, transparent),
+    0 10px 28px rgba(0, 0, 0, 0.35);
+}
+.citadel-slit[data-full="true"] .citadel-slit-import b {
+  font-size: 1rem;
+  color: #f6e7b8;
+}
+.citadel-slit[data-full="true"] .citadel-slit-import span {
+  font-size: 0.92rem;
+}
+.citadel-slit[data-full="true"] .citadel-slit-hint {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  padding: 0 4px;
+}
+.citadel-slit[data-full="true"] .citadel-slit-names {
+  max-height: none;
+  gap: 8px;
+}
+.citadel-slit[data-full="true"] .citadel-slit-names button {
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 16px;
+  font-size: 1rem;
+  background: linear-gradient(180deg, #f7d56a 0%, #d4b46a 55%, #b8892e 100%);
+  color: #1a140c;
+  box-shadow: 0 6px 0 #3a2810;
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  gap: 10px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 2px 12px;
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 88%;
+  padding: 10px 14px 12px;
+  border-radius: 18px 18px 18px 6px;
+  background: color-mix(in oklab, var(--color-surface) 78%, #0a0c12);
+  font-size: 1rem;
+  line-height: 1.4;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-accent) 22%, transparent);
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines [data-from="player"] {
+  align-self: flex-end;
+  align-items: flex-end;
+  border-radius: 18px 18px 6px 18px;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--color-gold) 28%, #1a140c), #16110c);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-gold) 40%, transparent);
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines [data-from="game"] {
+  max-width: 100%;
+  align-self: stretch;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 4px 4px;
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines b {
+  max-width: none;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines span {
+  white-space: pre-wrap;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+}
+.citadel-slit[data-full="true"] .citadel-slit-lines [data-from="game"] span {
+  font-size: 0.85rem;
+}
+.citadel-slit-end {
+  display: block !important;
+  height: 1px;
+  padding: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.citadel-slit-wait {
+  letter-spacing: 0.35em;
+  color: var(--color-accent);
+}
+.citadel-slit[data-full="true"] .citadel-slit-form {
+  gap: 8px;
+  padding-top: 4px;
+}
+.citadel-slit[data-full="true"] .citadel-slit-form input {
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 16px;
+  font-size: 16px;
+  background: color-mix(in oklab, var(--color-gold) 12%, #0e0c0a);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-gold) 35%, transparent);
+}
+.citadel-slit[data-full="true"] .citadel-slit-form button {
+  min-height: 52px;
+  min-width: 5.5rem;
+  padding: 0 18px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  box-shadow: 0 5px 0 #3a2810;
+}
+.citadel-slit[data-full="true"] .citadel-slit-form button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #3a2810;
+}
+.citadel-slit[data-full="true"] .citadel-slit-dot {
+  width: 10px;
+  height: 10px;
+  margin: 0;
+}
 .citadel-note {
   position: absolute;
   left: 16px;

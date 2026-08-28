@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ARTIFACTS } from "@/game/artifacts";
+import { DOOR_TEMPLATE_URL } from "@/lib/bot/door-template";
 import {
   connectBot,
   disconnectBot,
@@ -14,8 +15,14 @@ const TICK_MS = 250;
 const BURST_MS = 250;
 const BURST_FOR_MS = 20_000;
 const CLOCK_MS = 1000;
-const EMPTY: SessionPayload = { session: null, den: null, landables: [], bots: [], chat: [], door_template_url: null };
-/** Only Core Heart is open in artifacts.ts. One tap. Guest, not own. */
+const EMPTY: SessionPayload = {
+  session: null,
+  den: null,
+  landables: [],
+  bots: [],
+  chat: [],
+  door_template_url: DOOR_TEMPLATE_URL,
+};
 const OPEN_LANDABLE = ARTIFACTS.find((a) => a.open)?.id ?? "core-heart";
 
 function circuitLandable(payload: SessionPayload) {
@@ -25,7 +32,7 @@ function circuitLandable(payload: SessionPayload) {
 }
 
 function clockLabel(d = new Date()): string {
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 function lastBotAt(chat: SessionPayload["chat"]): string | null {
@@ -47,7 +54,7 @@ function actionLine(payload: SessionPayload): string {
   return payload.den ? `staying in ${payload.den.name}` : "staying in Pack HQ";
 }
 
-/** GROK_BOT_SLIT — live pane on the Citadel door. Real /api/bot session. Not a takeover. */
+/** GROK_BOT_SLIT — Citadel Door chat. Fullscreen on phone when talking. */
 export function BotSlit() {
   const [payload, setPayload] = useState<SessionPayload>(EMPTY);
   const [busy, setBusy] = useState(false);
@@ -56,29 +63,43 @@ export function BotSlit() {
   const [clock, setClock] = useState(() => clockLabel());
   const [listening, setListening] = useState(false);
   const [burstGen, setBurstGen] = useState(0);
-  const [narrow, setNarrow] = useState(false);
+  const [hallOpen, setHallOpen] = useState(false);
   const listeningRef = useRef(false);
   const listenMarkRef = useRef<string | null>(null);
+  const endRef = useRef<HTMLLIElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   listeningRef.current = listening;
   const session = payload.session;
   const guest = Boolean(session && session.mode === "travel");
   const landable = circuitLandable(payload);
   const canTravel = Boolean(session && session.mode === "stay" && landable);
   const bots = payload.bots ?? [];
-  const lines = (payload.chat ?? []).slice(narrow ? -3 : -6);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 500px)");
-    const sync = () => setNarrow(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
+  const lines = payload.chat ?? [];
+  const full = Boolean((picking && !session) || (session && hallOpen));
 
   useEffect(() => {
     const id = window.setInterval(() => setClock(clockLabel()), CLOCK_MS);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    const sync = () => {
+      const kb = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+      root.style.setProperty("--slit-kb", `${kb}px`);
+    };
+    sync();
+    vv?.addEventListener("resize", sync);
+    vv?.addEventListener("scroll", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      vv?.removeEventListener("resize", sync);
+      vv?.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+      root.style.removeProperty("--slit-kb");
+    };
+  }, [full]);
 
   useEffect(() => {
     let stop = false;
@@ -127,6 +148,10 @@ export function BotSlit() {
     };
   }, [listening, burstGen]);
 
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [lines.length, listening, full]);
+
   function onImportDoor() {
     const url = payload.door_template_url;
     if (!url) return;
@@ -145,6 +170,7 @@ export function BotSlit() {
       if (!next.error) {
         setPayload(next);
         setPicking(false);
+        setHallOpen(true);
       }
     } finally {
       setBusy(false);
@@ -159,6 +185,7 @@ export function BotSlit() {
         const next = await fetchBotSession();
         setPayload(next);
         setPicking(false);
+        setHallOpen(false);
         setDraft("");
         setListening(false);
       }
@@ -186,6 +213,7 @@ export function BotSlit() {
         listenMarkRef.current = lastBotAt(next.chat);
         setListening(true);
         setBurstGen((n) => n + 1);
+        inputRef.current?.focus();
       }
     } finally {
       setBusy(false);
@@ -200,23 +228,28 @@ export function BotSlit() {
       data-guest={guest ? "true" : undefined}
       data-present={session && session.activity && session.activity !== "not in the room" ? "true" : undefined}
       data-pick={picking && !session ? "true" : undefined}
-      data-talk={session ? "true" : undefined}
+      data-talk={session && hallOpen ? "true" : undefined}
       data-listen={listening ? "true" : undefined}
+      data-full={full ? "true" : undefined}
       aria-label="Grok Bot"
     >
       {!session ? (
         picking ? (
           <div className="citadel-slit-pick">
-            <div className="citadel-slit-pick-bar">
-              <span className="citadel-slit-who">Pick a bot</span>
-              <button type="button" className="citadel-slit-go" disabled={busy} onClick={() => setPicking(false)}>
-                Close
-              </button>
-            </div>
+            <header className="citadel-slit-hall-head">
+              <div className="citadel-slit-hall-bar">
+                <p className="citadel-slit-kicker">Boltverse</p>
+                <button type="button" className="citadel-slit-icon" disabled={busy} onClick={() => setPicking(false)}>
+                  Close
+                </button>
+              </div>
+              <h2 className="citadel-slit-title">Citadel Door</h2>
+              <p className="citadel-slit-sub">Add the Door bot, then talk here. No API keys.</p>
+            </header>
             {payload.door_template_url ? (
               <button type="button" className="citadel-slit-import" onClick={onImportDoor}>
                 <b>Import door bot</b>
-                <span>Citadel Door</span>
+                <span>Citadel Door by SmiR</span>
               </button>
             ) : (
               <p className="citadel-slit-import is-pending">
@@ -226,13 +259,13 @@ export function BotSlit() {
               </p>
             )}
             <p className="citadel-slit-hint" data-from="game" role="note">
-              After Import: Always allow Door chat line once.
+              After Import, allow the Door chat line once. Then connect below.
             </p>
             <ul className="citadel-slit-names">
               {bots.map((bot) => (
                 <li key={bot.id}>
                   <button type="button" disabled={busy} onClick={() => void onConnect(bot)}>
-                    {bot.name}
+                    Connect {bot.name}
                   </button>
                 </li>
               ))}
@@ -240,26 +273,34 @@ export function BotSlit() {
           </div>
         ) : (
           <>
-            <span className="citadel-slit-who">Grok Bot</span>
+            <span className="citadel-slit-who">Door</span>
             <button type="button" className="citadel-slit-go" disabled={busy} onClick={() => setPicking(true)}>
-              {busy ? "…" : "Connect"}
+              {busy ? "…" : "Talk"}
             </button>
           </>
         )
-      ) : (
+      ) : hallOpen ? (
         <div className="citadel-slit-on">
-          <div className="citadel-slit-head">
-            <span className="citadel-slit-dot" aria-hidden />
-            <p className="citadel-slit-live">
-              <strong>{session.bot_name || "Grok Bot"}</strong>
-              <em>
-                {actionLine(payload)}{listening ? " · …" : ""}
-                {guest ? <span className="citadel-slit-guest"> · guest</span> : null}
-                <time className="citadel-slit-clock" dateTime={clock}>
-                  {clock}
-                </time>
-              </em>
-            </p>
+          <header className="citadel-slit-hall-head">
+            <div className="citadel-slit-hall-bar">
+              <span className="citadel-slit-dot" aria-hidden />
+              <div className="citadel-slit-live">
+                <strong>{session.bot_name || "Citadel Door"}</strong>
+                <em>
+                  {actionLine(payload)}
+                  {listening ? " · listening" : ""}
+                  {guest ? <span className="citadel-slit-guest">guest</span> : null}
+                  <time className="citadel-slit-clock" dateTime={clock}>
+                    {clock}
+                  </time>
+                </em>
+              </div>
+              <button type="button" className="citadel-slit-icon" onClick={() => setHallOpen(false)}>
+                Door
+              </button>
+            </div>
+          </header>
+          <div className="citadel-slit-actions">
             {canTravel && landable ? (
               <button type="button" className="citadel-slit-travel" onClick={() => void onTravel()}>
                 Walk the Circuit
@@ -269,43 +310,52 @@ export function BotSlit() {
               Disconnect
             </button>
           </div>
-          <div className="citadel-slit-talk">
-            <ol className="citadel-slit-lines">
-              <li data-from="game">
-                <b>Game</b>
-                <span>First reply can take up to 2 minutes. After that, about 30 seconds. Always allow Door chat line once if the card is still up.</span>
+          <ol className="citadel-slit-lines">
+            <li data-from="game">
+              <b>Door</b>
+              <span>First reply can take a moment. Allow the Door chat line once if Grok Bot asks.</span>
+            </li>
+            {lines.map((line, i) => (
+              <li key={`${line.at}-${i}`} data-from={line.from}>
+                <b>{line.from === "player" ? "You" : session.bot_name}</b>
+                <span>{line.text}</span>
               </li>
-              {lines.map((line, i) => (
-                <li key={`${line.at}-${i}`} data-from={line.from}>
-                  <b>{line.from === "player" ? "You" : session.bot_name}</b>
-                  <span>{line.text}</span>
-                </li>
-              ))}
-              {listening ? (
-                <li data-from="bot" data-wait="true">
-                  <b>{session.bot_name}</b>
-                  <span>…</span>
-                </li>
-              ) : null}
-            </ol>
-            <form className="citadel-slit-form" onSubmit={(ev) => void onSend(ev)}>
-              <input
-                type="text"
-                name="line"
-                maxLength={240}
-                autoComplete="off"
-                placeholder={`to ${session.bot_name || "bot"}`}
-                value={draft}
-                disabled={busy}
-                onChange={(ev) => setDraft(ev.target.value)}
-                aria-label={`Message ${session.bot_name || "Grok Bot"}`}
-              />
-              <button type="submit" disabled={busy || !draft.trim()}>
-                Send
-              </button>
-            </form>
-          </div>
+            ))}
+            {listening ? (
+              <li data-from="bot" data-wait="true">
+                <b>{session.bot_name}</b>
+                <span className="citadel-slit-wait">…</span>
+              </li>
+            ) : null}
+            <li ref={endRef} aria-hidden className="citadel-slit-end" />
+          </ol>
+          <form className="citadel-slit-form" onSubmit={(ev) => void onSend(ev)}>
+            <input
+              ref={inputRef}
+              type="text"
+              name="line"
+              maxLength={240}
+              autoComplete="off"
+              enterKeyHint="send"
+              placeholder={`Message ${session.bot_name || "Citadel Door"}`}
+              value={draft}
+              disabled={busy}
+              onChange={(ev) => setDraft(ev.target.value)}
+              aria-label={`Message ${session.bot_name || "Grok Bot"}`}
+            />
+            <button type="submit" disabled={busy || !draft.trim()}>
+              Send
+            </button>
+          </form>
         </div>
+      ) : (
+        <>
+          <span className="citadel-slit-dot" aria-hidden />
+          <span className="citadel-slit-who">{session.bot_name || "Door"}</span>
+          <button type="button" className="citadel-slit-go" onClick={() => setHallOpen(true)}>
+            Open
+          </button>
+        </>
       )}
     </aside>
   );
