@@ -1,26 +1,12 @@
 import { getBearerToken } from "@/lib/auth/client";
 import { DOOR_TEMPLATE_URL } from "@/lib/bot/door-template";
 import type { GrokBotChoice, Landable, SessionPayload } from "@/lib/bot/types";
-import { CIRCUIT_MCP } from "./bot-pair";
 import { doorLocalResponse, withDoorBots } from "./door-local";
 
 export type { GrokBotChoice, Landable, SessionPayload };
 
-const DOOR_API = `${CIRCUIT_MCP.replace(/\/$/, "")}/v1/door`;
-const LIVE_FLAG = "odyssey-door-live";
-
 function isJson(res: Response): boolean {
   return (res.headers.get("content-type") || "").includes("application/json");
-}
-
-function doorLive(on?: boolean) {
-  try {
-    if (on === true) localStorage.setItem(LIVE_FLAG, "1");
-    if (on === false) localStorage.removeItem(LIVE_FLAG);
-    return localStorage.getItem(LIVE_FLAG) === "1";
-  } catch {
-    return false;
-  }
 }
 
 async function botFetch(init: RequestInit = {}): Promise<Response> {
@@ -28,17 +14,11 @@ async function botFetch(init: RequestInit = {}): Promise<Response> {
   const token = getBearerToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init.body && !headers.has("content-type")) headers.set("content-type", "application/json");
-  const extra = String(import.meta.env.VITE_BOT_API || "").trim();
-  const urls = [DOOR_API, extra.replace(/\/$/, ""), "/api/bot"].filter(Boolean);
-  for (const url of urls) {
-    try {
-      const toWorker = url.includes("workers.dev");
-      if (toWorker && doorLive()) headers.set("x-door", "1");
-      const res = await fetch(url, { ...init, headers, credentials: toWorker ? "omit" : "include" });
-      if (isJson(res) && (res.ok || res.status === 400 || res.status === 401)) return res;
-    } catch {
-      /* Pages / offline — fall through */
-    }
+  try {
+    const res = await fetch("/api/bot", { ...init, headers, credentials: "include" });
+    if (isJson(res) && (res.ok || res.status === 400 || res.status === 401)) return res;
+  } catch {
+    /* GitHub Pages has no /api/bot */
   }
   return doorLocalResponse(init);
 }
@@ -67,7 +47,6 @@ export async function connectBot(choice: { bot_id: string; bot_name: string }): 
   });
   const body = await readPayload(res);
   if (!res.ok) return { ...body, error: body.error || "Connect failed." };
-  doorLive(true);
   return body;
 }
 
@@ -102,7 +81,6 @@ export async function disconnectBot(): Promise<{ ok: boolean; error?: string }> 
     const body = await readPayload(res);
     return { ok: false, error: body.error || "Disconnect failed." };
   }
-  doorLive(false);
   return { ok: true };
 }
 

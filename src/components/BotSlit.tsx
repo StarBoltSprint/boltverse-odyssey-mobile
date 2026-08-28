@@ -313,7 +313,7 @@ export function BotSlit() {
           <ol className="citadel-slit-lines">
             <li data-from="game">
               <b>Door</b>
-              <span>This slit talks to Citadel Door, the Grok Bot you imported. If it is quiet, open that bot and let it watch the door.</span>
+              <span>Import Citadel Door, allow the Door chat line once, then talk here. Same as before — no MCP.</span>
             </li>
             {lines.map((line, i) => (
               <li key={`${line.at}-${i}`} data-from={line.from}>
