@@ -285,7 +285,7 @@ const TOOLS: Tool[] = [
 
 export async function installWebMcp() {
   if (typeof window === "undefined") return;
-  const bag: Record<string, Tool> = {};
+  const bag: Record<string, Tool> = { ...(window.__LC_TOOLS__ ?? {}) };
   for (const t of TOOLS) bag[t.name] = t;
   window.__LC_TOOLS__ = bag;
 

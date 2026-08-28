@@ -30,6 +30,7 @@ import { fetchVisions, proposeVision, decideVision, type Vision } from "@/game/v
 import { buzz } from "@/game/haptics";
 import { loadChain, needleDeg, talkWitness } from "@/game/play";
 import { bindAgentHandle, installWebMcp } from "@/game/webmcp";
+import { installDoorTools } from "@/game/door-tools";
 import { fetchBotSession, type SessionPayload } from "@/game/bot-session";
 import { GrokBotSignIn } from "./GrokBotSignIn";
 import { BotRelay } from "./BotRelay";
@@ -345,7 +346,7 @@ export function CircuitApp() {
   }, [landNow]);
 
   useEffect(() => {
-    void installWebMcp();
+    void installWebMcp().then(() => installDoorTools());
     bindAgentHandle({
       land: () => landNow(),
       talk: () => {
